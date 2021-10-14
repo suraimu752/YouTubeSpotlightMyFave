@@ -28,8 +28,8 @@ function findMyFave(){
     });
 }
 
-setFave = "<div id='setFave' hidden><img style='padding-top: 2px;' src=" + chrome.extension.getURL("imgs/addFave.png") + " width='35px' height='35px'></div>";
-removeFave = "<div id='removeFave' hidden><img style='padding-top: 2px;' src=" + chrome.extension.getURL("imgs/remFave.png") + " width='35px' height='35px'></div>";
+setFave = "<div id='setFave' hidden><img style='padding-top: 2px;' src=" + chrome.runtime.getURL("imgs/addFave.png") + " width='35px' height='35px'></div>";
+removeFave = "<div id='removeFave' hidden><img style='padding-top: 2px;' src=" + chrome.runtime.getURL("imgs/remFave.png") + " width='35px' height='35px'></div>";
 
 function initialize(){
     if(location.href.endsWith("subscriptions")){
