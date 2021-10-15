@@ -21,7 +21,6 @@ function remove(cid){
 
 // 推し登録されてるチャンネルの動画があったら先頭に移動
 function findMyFave(){
-    console.log($("ytd-grid-video-renderer.ytd-grid-renderer"));
     $("ytd-grid-video-renderer.ytd-grid-renderer").each(function(i, o){
         if(isExists($(o).find(".yt-simple-endpoint.style-scope.yt-formatted-string").attr("href").split("/").slice(-1)[0])){
             $(o).parent().prepend(o);
