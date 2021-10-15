@@ -21,7 +21,8 @@ function remove(cid){
 
 // 推し登録されてるチャンネルの動画があったら先頭に移動
 function findMyFave(){
-    $("ytd-grid-video-renderer").each(function(i, o){
+    console.log($("ytd-grid-video-renderer.ytd-grid-renderer"));
+    $("ytd-grid-video-renderer.ytd-grid-renderer").each(function(i, o){
         if(isExists($(o).find(".yt-simple-endpoint.style-scope.yt-formatted-string").attr("href").split("/").slice(-1)[0])){
             $(o).parent().prepend(o);
         }
@@ -71,8 +72,8 @@ function jsLoaded() {
         
         initialize();
         
-        // youtubeは他のページに移動する際に検索バーやサイドバーは再読み込みしない ページ移動検出用のやつ
-        // pageNavigation要素がhiddenになったら遷移完了
+        // youtubeは他のページに移動する際に検索バーやサイドバーは再読み込みしない 
+        // ページ移動検出用 pageNavigation要素がhiddenになったら遷移完了
         var pageNavigation = document.getElementsByTagName("yt-page-navigation-progress")[0];
         let observer1 = new MutationObserver(function(){
             if(pageNavigation.getAttribute("hidden") == ""){
