@@ -8,12 +8,44 @@
 #spotlightRenderer::-webkit-scrollbar {
     width: 16px;
 }
-#spotlightRenderer {
-    transform: scale(0.8, 0.8);
+#spotlightRenderer.overflow{
+    width: 125%;
+    transform: scale(0.8);
     transform-origin: left top;
-    display: flex; 
+    display: flex;
     flex-direction: row; 
     overflow-x: scroll;
     overflow-y: hidden;
-    width: 125%;
+    position: relative;
+}
+#spotlightRenderer.wrap{
+    width: 133.33%;
+    transform: scale(0.75);
+    transform-origin: left top;
+    display: flex;
+    flex-direction: row; 
+    flex-wrap: wrap;
+    overflow-x: visible;
+    position: relative;
+}
+#spotlightWrapper {
+    position: relative;
+    padding-bottom: 25px;
+}
+.spotlightBtn {
+    color: #FFF;
+    position: absolute;
+    font-size: 30px;
+    top: 50px;
+    padding: 25px 10px;
+    background-color: #00000070;
+}
+#spotlightLeftBtn {
+    left: 0;
+}
+#spotlightRightBtn {
+    right: -1px;
+}
+#view-all.ytd-grid-renderer {
+    margin: 0 !important;
 }

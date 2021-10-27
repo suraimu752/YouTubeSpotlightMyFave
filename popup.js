@@ -3,7 +3,7 @@ let arch;
 let sche;
 
 function update(){
-    let l, a, s;
+    let l, a, s, stl;
     if(document.getElementById("live").checked){
         l = 1;
     }
@@ -24,7 +24,15 @@ function update(){
     else{
         s = 0;
     }
-    chrome.extension.getBackgroundPage().setFlags(l, a, s);
+
+    if(document.getElementById("overflow").checked){
+        stl = "overflow";
+    }
+    else{
+        stl = "wrap";
+    }
+    
+    chrome.extension.getBackgroundPage().setFlags(l, a, s, stl);
 }
 
 
@@ -43,6 +51,7 @@ window.onload = function(){
             if(flags[2] == 0){
                 document.getElementById("sche").checked = false;
             }
+            document.getElementById(flags[3]).checked = true;
         
             document.getElementById("live").addEventListener("click", () => {
                 update();
@@ -51,6 +60,12 @@ window.onload = function(){
                 update();
             });
             document.getElementById("sche").addEventListener("click", () => {
+                update();
+            });
+            document.getElementById("overflow").addEventListener("click", () => {
+                update();
+            });
+            document.getElementById("wrap").addEventListener("click", () => {
                 update();
             });
             document.getElementById("refreshBtn").addEventListener("click", () => {

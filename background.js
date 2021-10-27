@@ -1,16 +1,19 @@
-if(localStorage["spotlightMyFaveFlags"] == undefined) localStorage["spotlightMyFaveFlags"] = "1,1,1";
+if(localStorage["spotlightMyFaveFlags"] == undefined) localStorage["spotlightMyFaveFlags"] = "1,1,1,overflow";
 
 function getFlags(){
+    if(localStorage["spotlightMyFaveFlags"] == undefined) localStorage["spotlightMyFaveFlags"] = "1,1,1,overflow";
+
     let ls = localStorage["spotlightMyFaveFlags"];
     let lsSplited = ls.split(",");
     live = parseInt(lsSplited[0]);
     arch = parseInt(lsSplited[1]);
     sche = parseInt(lsSplited[2]);
+    style = lsSplited[3];
 
-    return([live, arch, sche]);
+    return([live, arch, sche, style]);
 }
-function setFlags(live, arch, sche){
-    localStorage["spotlightMyFaveFlags"] = `${live},${arch},${sche}`;
+function setFlags(live, arch, sche, style){
+    localStorage["spotlightMyFaveFlags"] = `${live},${arch},${sche},${style}`;
 }
 
 function reloadCurrentPage(){

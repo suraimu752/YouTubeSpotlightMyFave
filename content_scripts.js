@@ -27,29 +27,85 @@ function getFlags(){
     })
 }
 
+$(window).resize(() => {
+    $("#spotlightWrapper").height(171 * Math.floor($("#spotlightRenderer").height() / 171));
+});
+
 // 推し登録されてるチャンネルの動画があったら先頭に移動
 function findMyFave(){
-    document.getElementById("title-container").insertAdjacentHTML("beforebegin", 
-        `<ytd-grid-renderer id="spotlightRenderer" class="style-scope ytd-shelf-renderer"></ytd-grid-renderer>`);
+    $("#title-container").before(`<div id="spotlightWrapper"></div>`)
+    $("#spotlightWrapper").append(`<ytd-grid-renderer id="spotlightRenderer" class="style-scope ytd-shelf-renderer"></ytd-grid-renderer>`);
 
     let live, arch, sche;
     getFlags().then((response) => {
         live = response[0];
         arch = response[1];
         sche = response[2];
+        style = response[3];
+        if(style == "overflow"){
+            $("#spotlightWrapper").append("<a href='javascript:void(0)'><div id='spotlightLeftBtn' class='spotlightBtn'>&lt;</div></a><a href='javascript:void(0)'><div id='spotlightRightBtn' class='spotlightBtn'>&gt;</div></a>");
+            $("#spotlightRenderer").addClass("overflow");
+
+            $("#spotlightLeftBtn").click(() => {
+                $("#spotlightRenderer").animate({
+                    scrollLeft: $("#spotlightRenderer").scrollLeft() - 330
+                }, 300);
+                return false;
+            });
+            $("#spotlightRightBtn").click(() => {
+                $("#spotlightRenderer").animate({
+                    scrollLeft: $("#spotlightRenderer").scrollLeft() + 330
+                }, 300);
+                return false;
+            });
+            $("#spotlightRenderer").scroll(() => {
+                let left = $("#spotlightRenderer").scrollLeft();
+                let scrollWidth = $("#spotlightRenderer").get(0).scrollWidth;
+                let offsetWidth = $("#spotlightRenderer").get(0).offsetWidth;
+        
+                if(left > 0){
+                    $("#spotlightLeftBtn").fadeIn();
+                }
+                else{
+                    $("#spotlightLeftBtn").fadeOut();
+                }
+        
+                if(left < scrollWidth - offsetWidth){
+                    $("#spotlightRightBtn").fadeIn();
+                }
+                else{
+                    $("#spotlightRightBtn").fadeOut();
+                }
+        
+                $("#spotlightRenderer").children(".style-scope.ytd-grid-renderer").each((i, o) => {
+                    if($(o).offset().left <= offsetWidth){
+                        $(o).trigger("mouseover");
+                    }
+                })
+            })
+            $("#spotlightLeftBtn").fadeOut();
+        }
+        else{
+            $("#spotlightRenderer").addClass("wrap");
+        }
+
         $("ytd-grid-video-renderer.ytd-grid-renderer").each(function(i, o){
             if(isExists($(o).find(".yt-simple-endpoint.style-scope.yt-formatted-string").attr("href").split("/").slice(-1)[0])){
                 if(live && !$(o).find("#video-badges").attr("hidden")){
                     $("#spotlightRenderer").append(o);
+                    $(o).trigger("mouseover");
                 }
                 if(arch && $(o).find("#video-badges").attr("hidden") && !($(o).find("ytd-toggle-button-renderer").length)){
                     $("#spotlightRenderer").append(o);
+                    $(o).trigger("mouseover");
                 }
                 if(sche && $(o).find("ytd-toggle-button-renderer").length){
                     $("#spotlightRenderer").append(o);
+                    $(o).trigger("mouseover");
                 }
             }
         });
+        $("#spotlightWrapper").height(173 * Math.floor($("#spotlightRenderer").height() / 173));
     });
 }
 
