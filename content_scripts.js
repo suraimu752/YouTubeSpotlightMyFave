@@ -19,12 +19,37 @@ function remove(cid){
     localStorage["spotlightMyFave"] = ls.join(",");
 }
 
+function getFlags(){
+    return new Promise(function(resolve, reject){
+        chrome.runtime.sendMessage({method: "getFlags"}, function(response){
+            resolve(response);
+        });
+    })
+}
+
 // 推し登録されてるチャンネルの動画があったら先頭に移動
 function findMyFave(){
-    $("ytd-grid-video-renderer.ytd-grid-renderer").each(function(i, o){
-        if(isExists($(o).find(".yt-simple-endpoint.style-scope.yt-formatted-string").attr("href").split("/").slice(-1)[0])){
-            $(o).parent().prepend(o);
-        }
+    document.getElementById("title-container").insertAdjacentHTML("beforebegin", 
+        `<ytd-grid-renderer id="spotlightRenderer" class="style-scope ytd-shelf-renderer"></ytd-grid-renderer>`);
+
+    let live, arch, sche;
+    getFlags().then((response) => {
+        live = response[0];
+        arch = response[1];
+        sche = response[2];
+        $("ytd-grid-video-renderer.ytd-grid-renderer").each(function(i, o){
+            if(isExists($(o).find(".yt-simple-endpoint.style-scope.yt-formatted-string").attr("href").split("/").slice(-1)[0])){
+                if(live && !$(o).find("#video-badges").attr("hidden")){
+                    $("#spotlightRenderer").append(o);
+                }
+                if(arch && $(o).find("#video-badges").attr("hidden") && !($(o).find("ytd-toggle-button-renderer").length)){
+                    $("#spotlightRenderer").append(o);
+                }
+                if(sche && $(o).find("ytd-toggle-button-renderer").length){
+                    $("#spotlightRenderer").append(o);
+                }
+            }
+        });
     });
 }
 
