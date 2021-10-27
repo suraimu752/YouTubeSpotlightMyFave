@@ -30,10 +30,7 @@ function getFlags(){
 // 推し登録されてるチャンネルの動画があったら先頭に移動
 function findMyFave(){
     document.getElementById("title-container").insertAdjacentHTML("beforebegin", 
-        `<ytd-grid-renderer id="spotlightRenderer" class="style-scope ytd-shelf-renderer"
-        style="
-        display: flex; flex-direction: row; margin-bottom: 20px; overflow-x: scroll;
-        "></ytd-grid-renderer>`);
+        `<ytd-grid-renderer id="spotlightRenderer" class="style-scope ytd-shelf-renderer"></ytd-grid-renderer>`);
 
     let live, arch, sche;
     getFlags().then((response) => {
@@ -43,13 +40,13 @@ function findMyFave(){
         $("ytd-grid-video-renderer.ytd-grid-renderer").each(function(i, o){
             if(isExists($(o).find(".yt-simple-endpoint.style-scope.yt-formatted-string").attr("href").split("/").slice(-1)[0])){
                 if(live && !$(o).find("#video-badges").attr("hidden")){
-                    $("#spotlightRenderer").prepend(o);
+                    $("#spotlightRenderer").append(o);
                 }
                 if(arch && $(o).find("#video-badges").attr("hidden") && !($(o).find("ytd-toggle-button-renderer").length)){
-                    $("#spotlightRenderer").prepend(o);
+                    $("#spotlightRenderer").append(o);
                 }
                 if(sche && $(o).find("ytd-toggle-button-renderer").length){
-                    $("#spotlightRenderer").prepend(o);
+                    $("#spotlightRenderer").append(o);
                 }
             }
         });
@@ -58,23 +55,6 @@ function findMyFave(){
 
 setFave = "<div id='setFave' hidden><img style='padding-top: 2px;' src=" + chrome.runtime.getURL("imgs/addFave.png") + " width='35px' height='35px'></div>";
 removeFave = "<div id='removeFave' hidden><img style='padding-top: 2px;' src=" + chrome.runtime.getURL("imgs/remFave.png") + " width='35px' height='35px'></div>";
-
-let myStyle = `
-#spotlightRenderer::-webkit-scrollbar-thumb {
-    height: 56px;
-    border-radius: 8px;
-    border: 4px solid transparent;
-    background-clip: content-box;
-    background-color: var(--yt-spec-text-secondary);
-}
-#spotlightRenderer::-webkit-scrollbar {
-    width: 16px;
-}
-`
-var newStyle = document.createElement('style');
-newStyle.type = 'text/css';
-// CSSの内容を書く
-newStyle.innerText = myStyle;
 
 function initialize(){
     if(location.href.endsWith("subscriptions")){

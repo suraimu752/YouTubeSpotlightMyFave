@@ -14,7 +14,8 @@
     "content_scripts": [
         {
             "matches": ["https://www.youtube.com/*"],
-            "js": ["jquery-3.5.1.min.js", "content_scripts.js"]
+            "js": ["jquery-3.5.1.min.js", "content_scripts.js"],
+            "css": ["mystyle.css"]
         }
     ],
     "background": {
