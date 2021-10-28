@@ -71,7 +71,7 @@ function findMyFave(){
                     $("#spotlightLeftBtn").fadeOut();
                 }
         
-                if(left < scrollWidth - offsetWidth){
+                if(left < scrollWidth - offsetWidth - 1){
                     $("#spotlightRightBtn").fadeIn();
                 }
                 else{
@@ -84,18 +84,6 @@ function findMyFave(){
                     }
                 })
             })
-
-            let left = $("#spotlightRenderer").scrollLeft();
-            let scrollWidth = $("#spotlightRenderer").get(0).scrollWidth;
-            let offsetWidth = $("#spotlightRenderer").get(0).offsetWidth;
-            $("#spotlightLeftBtn").fadeOut();
-            if(left < scrollWidth - offsetWidth){
-                $("#spotlightRightBtn").fadeIn();
-            }
-            else{
-                $("#spotlightRightBtn").fadeOut();
-            }
-            
         }
         else{
             $("#spotlightRenderer").addClass("wrap");
@@ -117,6 +105,16 @@ function findMyFave(){
                 }
             }
         });
+        let left = $("#spotlightRenderer").scrollLeft();
+        let scrollWidth = $("#spotlightRenderer").get(0).scrollWidth;
+        let offsetWidth = $("#spotlightRenderer").get(0).offsetWidth;
+        $("#spotlightLeftBtn").fadeOut();
+        if(left < scrollWidth - offsetWidth - 1){
+            $("#spotlightRightBtn").fadeIn();
+        }
+        else{
+            $("#spotlightRightBtn").fadeOut();
+        }
         $("#spotlightWrapper").height(173 * Math.floor($("#spotlightRenderer").height() / 173));
     });
 }
