@@ -43,6 +43,7 @@ function findMyFave(){
         sche = response[2];
         style = response[3];
         if(style == "overflow"){
+            $("#spotlightWrapper").css("padding-bottom", "50px");
             $("#spotlightWrapper").append("<a href='javascript:void(0)'><div id='spotlightLeftBtn' class='spotlightBtn'>&lt;</div></a><a href='javascript:void(0)'><div id='spotlightRightBtn' class='spotlightBtn'>&gt;</div></a>");
             $("#spotlightRenderer").addClass("overflow");
 
