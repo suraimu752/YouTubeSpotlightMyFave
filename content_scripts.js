@@ -84,7 +84,18 @@ function findMyFave(){
                     }
                 })
             })
+
+            let left = $("#spotlightRenderer").scrollLeft();
+            let scrollWidth = $("#spotlightRenderer").get(0).scrollWidth;
+            let offsetWidth = $("#spotlightRenderer").get(0).offsetWidth;
             $("#spotlightLeftBtn").fadeOut();
+            if(left < scrollWidth - offsetWidth){
+                $("#spotlightRightBtn").fadeIn();
+            }
+            else{
+                $("#spotlightRightBtn").fadeOut();
+            }
+            
         }
         else{
             $("#spotlightRenderer").addClass("wrap");
