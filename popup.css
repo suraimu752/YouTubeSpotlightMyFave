@@ -10,7 +10,11 @@ body{
 }
 
 p{
-    padding: 10px;
+    padding-left: 10px;
+}
+
+img{
+    padding-bottom: 10px;
 }
 
 .wrapper{
@@ -29,6 +33,10 @@ p{
     float: left;
     text-align: center;
     background-color: #888;
+}
+.style{
+    width: 130px;
+    height: 120px;
 }
 
 #overflow:checked ~ #loverflow{
