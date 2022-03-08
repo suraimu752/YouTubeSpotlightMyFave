@@ -2,7 +2,7 @@
     "name": "YouTubeSpotlightMyFave",
     "description": "推しチャンネルを設定すると、Youtubeの登録チャンネルのページでその推しのライブを一番上に表示するやつ",
     "manifest_version": 2,
-    "version": "1.1.1",
+    "version": "1.1.2",
     "icons": {
         "128": "icon.png",
         "32": "icon_32.png"

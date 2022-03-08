@@ -1,3 +1,5 @@
+let initFlag = false;
+
 // localStorageの初期化
 if(localStorage["spotlightMyFave"] == undefined) localStorage["spotlightMyFave"] = "";
 function isExists(cid){
@@ -47,18 +49,18 @@ function findMyFave(){
             $("#spotlightWrapper").append("<a href='javascript:void(0)'><div id='spotlightLeftBtn' class='spotlightBtn'>&lt;</div></a><a href='javascript:void(0)'><div id='spotlightRightBtn' class='spotlightBtn'>&gt;</div></a>");
             $("#spotlightRenderer").addClass("overflow");
 
-            $("#spotlightLeftBtn").click(() => {
+            $(document).on("click", "#spotlightLeftBtn", (() => {
                 $("#spotlightRenderer").animate({
                     scrollLeft: $("#spotlightRenderer").scrollLeft() - 330
                 }, 300);
                 return false;
-            });
-            $("#spotlightRightBtn").click(() => {
+            }));
+            $(document).on("click", "#spotlightRightBtn", (() => {
                 $("#spotlightRenderer").animate({
                     scrollLeft: $("#spotlightRenderer").scrollLeft() + 330
                 }, 300);
                 return false;
-            });
+            }));
             $("#spotlightRenderer").scroll(() => {
                 let left = $("#spotlightRenderer").scrollLeft();
                 let scrollWidth = $("#spotlightRenderer").get(0).scrollWidth;
@@ -123,8 +125,11 @@ setFave = "<div id='setFave' hidden><img style='padding-top: 2px;' src=" + chrom
 removeFave = "<div id='removeFave' hidden><img style='padding-top: 2px;' src=" + chrome.runtime.getURL("imgs/remFave.png") + " width='35px' height='35px'></div>";
 
 function initialize(){
+    if(initFlag) return;
+
     if(location.href.endsWith("subscriptions")){
         findMyFave();
+        initFlag = true;
     }
     else{
         urls = location.href.split("/");
