@@ -133,9 +133,32 @@ function initialize(){
     }
     else{
         urls = location.href.split("/");
+        console.log("koko");
         // チャンネルIDをカスタムしてる場合は   youtube.com/c/[channelID]
         // カスタムしていなければ               youtube.com/channel/[channelID]
-        if(urls[3].indexOf("c") != -1){
+        // ハンドル設定済みだと                 youtube.com/@[channelID]
+        if(urls[3].indexOf("@") != -1){
+            let cid = urls[3];
+            $("#other-buttons").append(removeFave);
+            $("#other-buttons").append(setFave);
+            $("#removeFave").on("click", () => {
+                $("#removeFave").attr("hidden", "hidden");
+                $("#setFave").removeAttr("hidden");
+                remove(cid);
+            });
+            $("#setFave").on("click", () => {
+                $("#setFave").attr("hidden", "hidden");
+                $("#removeFave").removeAttr("hidden");
+                add(cid);
+            });
+            if(isExists(cid)){
+                $("#removeFave").removeAttr("hidden");
+            }
+            else{
+                $("#setFave").removeAttr("hidden");
+            }
+        }
+        else if(urls[3].indexOf("c") != -1){
             let cid = urls[4];
             $("#other-buttons").append(removeFave);
             $("#other-buttons").append(setFave);
