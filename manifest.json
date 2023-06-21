@@ -1,5 +1,5 @@
 {
-    "name": "YouTubeSpotlightMyFave",
+    "name": "YouTube Spotlight My Fave",
     "description": "推しチャンネルを設定すると、Youtubeの登録チャンネルのページでその推しのライブを一番上に表示するやつ",
     "manifest_version": 2,
     "version": "1.2",
