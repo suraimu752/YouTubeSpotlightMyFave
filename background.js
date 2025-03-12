@@ -1,35 +1,48 @@
-if(localStorage["spotlightMyFaveFlags"] == undefined) localStorage["spotlightMyFaveFlags"] = "1,1,1,overflow";
+// デフォルト設定の初期化
+chrome.storage.local.get(['spotlightMyFaveFlags'], function(result) {
+    if (!result.spotlightMyFaveFlags) {
+        chrome.storage.local.set({spotlightMyFaveFlags: "1,1,1,overflow"});
+    }
+});
 
-function getFlags(){
-    if(localStorage["spotlightMyFaveFlags"] == undefined) localStorage["spotlightMyFaveFlags"] = "1,1,1,overflow";
+async function getFlags(){
+    const result = await chrome.storage.local.get(['spotlightMyFaveFlags']);
+    if (!result.spotlightMyFaveFlags) {
+        await chrome.storage.local.set({spotlightMyFaveFlags: "1,1,1,overflow"});
+        return [1, 1, 1, "overflow"];
+    }
 
-    let ls = localStorage["spotlightMyFaveFlags"];
-    let lsSplited = ls.split(",");
-    live = parseInt(lsSplited[0]);
-    arch = parseInt(lsSplited[1]);
-    sche = parseInt(lsSplited[2]);
-    style = lsSplited[3];
+    const lsSplited = result.spotlightMyFaveFlags.split(",");
+    const live = parseInt(lsSplited[0]);
+    const arch = parseInt(lsSplited[1]);
+    const sche = parseInt(lsSplited[2]);
+    const style = lsSplited[3];
 
-    return([live, arch, sche, style]);
+    return [live, arch, sche, style];
 }
-function setFlags(live, arch, sche, style){
-    localStorage["spotlightMyFaveFlags"] = `${live},${arch},${sche},${style}`;
-}
 
-function reloadCurrentPage(){
-    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        chrome.tabs.reload(tabs[0].id);
+async function setFlags(live, arch, sche, style){
+    await chrome.storage.local.set({
+        spotlightMyFaveFlags: `${live},${arch},${sche},${style}`
     });
 }
 
+async function reloadCurrentPage(){
+    const [tab] = await chrome.tabs.query({active: true, currentWindow: true});
+    if (tab) {
+        await chrome.tabs.reload(tab.id);
+    }
+}
+
+// Service Worker用のメッセージハンドラー
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (request.method == "getFlags"){
-            sendResponse(getFlags());
+            getFlags().then(flags => {
+                sendResponse(flags);
+            });
+            return true; // 非同期レスポンスのために必要
         }
-        else{
-            sendResponse();
-        }
-        return true;
+        return false;
     }
 );

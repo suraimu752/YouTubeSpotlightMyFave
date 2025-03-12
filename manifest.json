@@ -1,13 +1,13 @@
 {
     "name": "YouTube Spotlight My Fave",
     "description": "推しチャンネルを設定すると、Youtubeの登録チャンネルのページでその推しのライブを一番上に表示するやつ",
-    "manifest_version": 2,
+    "manifest_version": 3,
     "version": "1.2.1",
     "icons": {
         "128": "icon.png",
         "32": "icon_32.png"
     },
-    "browser_action": {
+    "action": {
         "default_icon": "icon_32.png",
         "default_popup": "popup.html"
     },
@@ -19,16 +19,17 @@
         }
     ],
     "background": {
-        "scripts": [
-            "background.js"
-        ]
+        "service_worker": "background.js"
     },
     "permissions": [
-        "unlimitedStorage",
+        "storage",
         "activeTab"
     ],
-    "web_accessible_resources": [
-        "imgs/addFave.png",
-        "imgs/remFave.png"
-    ]
+    "web_accessible_resources": [{
+        "resources": [
+            "imgs/addFave.png",
+            "imgs/remFave.png"
+        ],
+        "matches": ["https://www.youtube.com/*"]
+    }]
 }
