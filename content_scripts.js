@@ -91,17 +91,22 @@ async function findMyFave(){
         const itemHeight = 308;
         const items = spotlightRenderer.find('ytd-rich-item-renderer');
         const itemCount = items.length;
+        const containerWidth = $("#contents").width();
         
         if (itemCount > 0) {
             if (style === "wrap") {
-                const containerWidth = $("#contents").width();
                 const itemsPerRow = Math.floor(containerWidth / 308);
                 const rows = Math.ceil(itemCount / itemsPerRow);
                 spotlightWrapper.height(itemHeight * rows);
             } else {
+                // overflowモードの場合、高さは固定
                 spotlightWrapper.height(itemHeight);
+                // rendererの幅を設定（アイテム数 × アイテムの幅）
+                const totalWidth = itemCount * 308;
+                spotlightRenderer.width(totalWidth);
             }
-            spotlightWrapper.width($("#contents").width());
+            // wrapperの幅はコンテンツに合わせる
+            spotlightWrapper.width(containerWidth);
         }
     };
 
@@ -109,41 +114,94 @@ async function findMyFave(){
     if(style == "overflow"){
         spotlightWrapper.css({
             "padding-bottom": "50px",
-            "margin-top": "25px"
+            "margin-top": "25px",
+            "overflow-x": "auto", // 横スクロールを有効化
+            "overflow-y": "hidden", // 縦スクロールを無効化
+            "scroll-behavior": "smooth", // スムーズスクロール
+            "position": "relative" // 子要素の位置決めの基準点
         });
-        spotlightWrapper.append("<a href='javascript:void(0)'><div id='spotlightLeftBtn' class='spotlightBtn'>&lt;</div></a><a href='javascript:void(0)'><div id='spotlightRightBtn' class='spotlightBtn'>&gt;</div></a>");
+        spotlightRenderer.css({
+            "display": "flex",
+            "flex-wrap": "nowrap", // 折り返し防止
+            "min-height": "308px", // 最小高さを設定
+            "overflow": "visible" // スクロールをwrapperに移動
+        });
+
+        // ボタンを追加
+        $("body").append(`
+            <div id='spotlightLeftBtn' class='spotlightBtn' style='position: fixed; z-index: 2000;'>&lt;</div>
+            <div id='spotlightRightBtn' class='spotlightBtn' style='position: fixed; z-index: 2000;'>&gt;</div>
+        `);
+
+        // ボタンの位置を更新する関数
+        const updateButtonPositions = () => {
+            const wrapperRect = spotlightWrapper[0].getBoundingClientRect();
+            $("#spotlightLeftBtn").css({
+                left: wrapperRect.left + 10 + 'px',
+                top: wrapperRect.top + (wrapperRect.height / 2) + 'px',
+                transform: 'translateY(-50%)'
+            });
+            $("#spotlightRightBtn").css({
+                right: (window.innerWidth - wrapperRect.right) + 10 + 'px',
+                top: wrapperRect.top + (wrapperRect.height / 2) + 'px',
+                transform: 'translateY(-50%)'
+            });
+        };
+
+        // 初期位置設定
+        updateButtonPositions();
+        
+        // スクロールとリサイズ時に位置を更新
+        $(window).on('scroll resize', updateButtonPositions);
+
         spotlightRenderer.addClass("overflow");
 
         $(document).on("click", "#spotlightLeftBtn", function() {
-            spotlightRenderer.animate({
-                scrollLeft: spotlightRenderer.scrollLeft() - 330
-            }, 300);
+            const scrollAmount = spotlightWrapper.width() * 0.8;
+            spotlightWrapper.stop().animate({
+                scrollLeft: spotlightWrapper.scrollLeft() - scrollAmount
+            }, {
+                duration: 400,
+                easing: 'swing'
+            });
             return false;
         });
 
         $(document).on("click", "#spotlightRightBtn", function() {
-            spotlightRenderer.animate({
-                scrollLeft: spotlightRenderer.scrollLeft() + 330
-            }, 300);
+            const scrollAmount = spotlightWrapper.width() * 0.8;
+            spotlightWrapper.stop().animate({
+                scrollLeft: spotlightWrapper.scrollLeft() + scrollAmount
+            }, {
+                duration: 400,
+                easing: 'swing'
+            });
             return false;
         });
 
-        spotlightRenderer.on("scroll", function() {
-            const left = spotlightRenderer.scrollLeft();
-            const scrollWidth = spotlightRenderer.get(0).scrollWidth;
-            const offsetWidth = spotlightRenderer.get(0).offsetWidth;
+        // スクロールイベントの最適化
+        let scrollTimeout;
+        spotlightWrapper.on("scroll", function() {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                const left = spotlightWrapper.scrollLeft();
+                const scrollWidth = spotlightWrapper[0].scrollWidth;
+                const clientWidth = spotlightWrapper[0].clientWidth;
+                const maxScroll = scrollWidth - clientWidth;
 
-            if(left > 0){
-                $("#spotlightLeftBtn").fadeIn();
-            } else {
-                $("#spotlightLeftBtn").fadeOut();
-            }
+                // 左ボタンの表示制御
+                if (left > 10) {
+                    $("#spotlightLeftBtn").fadeIn(200);
+                } else {
+                    $("#spotlightLeftBtn").fadeOut(200);
+                }
 
-            if(left < scrollWidth - offsetWidth - 1){
-                $("#spotlightRightBtn").fadeIn();
-            } else {
-                $("#spotlightRightBtn").fadeOut();
-            }
+                // 右ボタンの表示制御
+                if (left < maxScroll - 10) {
+                    $("#spotlightRightBtn").fadeIn(200);
+                } else {
+                    $("#spotlightRightBtn").fadeOut(200);
+                }
+            }, 100);
         });
     } else {
         spotlightWrapper.css("margin-top", "25px");
@@ -240,9 +298,9 @@ async function findMyFave(){
             updateHeight();
             
             if (style === "overflow") {
-                const left = spotlightRenderer.scrollLeft();
-                const scrollWidth = spotlightRenderer.get(0).scrollWidth;
-                const offsetWidth = spotlightRenderer.get(0).offsetWidth;
+                const left = spotlightWrapper.scrollLeft();
+                const scrollWidth = spotlightWrapper[0].scrollWidth;
+                const offsetWidth = spotlightWrapper[0].offsetWidth;
                 
                 if(left > 0){
                     $("#spotlightLeftBtn").fadeIn();
