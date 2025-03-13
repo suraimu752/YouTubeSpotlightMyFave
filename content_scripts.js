@@ -224,7 +224,6 @@ async function findMyFave(){
                 if (isLoaded) {
                     resolve(true);
                 } else {
-                    console.log("checkThumbnail"); // デバッグ用 消すな
                     setTimeout(checkThumbnail, 100);
                 }
             };
@@ -273,18 +272,32 @@ async function findMyFave(){
                     console.log("Processing item for channel:", channelId);
                     await waitForThumbnail($item);
                     await new Promise(resolve => setTimeout(resolve, 100));
-                    const $clonedItem = $item.clone(true);
                     
-                    if (live && !$item.find("ytd-badge-supported-renderer").attr("hidden")) {
+                    // 要素をディープクローン
+                    const $clonedItem = $item.clone(true, true);
+                    
+                    // クローンした要素のリンクを修正（相対パスを絶対パスに）
+                    $clonedItem.find('a').each(function() {
+                        const $link = $(this);
+                        const href = $link.attr('href');
+                        if (href && href.startsWith('/')) {
+                            $link.attr('href', 'https://www.youtube.com' + href);
+                        }
+                    });
+
+                    // ライブ配信、アーカイブ、予定配信の判定
+                    const isLive = !$item.find("ytd-badge-supported-renderer").attr("hidden");
+                    const hasScheduleBadge = $item.find("ytd-toggle-button-renderer").length > 0;
+                    
+                    if (live && isLive) {
                         $clonedItem.appendTo(spotlightRenderer);
                         updateHeight();
                     }
-                    if (arch && $item.find("ytd-badge-supported-renderer").attr("hidden") && 
-                        !$item.find("ytd-toggle-button-renderer").length) {
+                    if (arch && !isLive && !hasScheduleBadge) {
                         $clonedItem.appendTo(spotlightRenderer);
                         updateHeight();
                     }
-                    if (sche && $item.find("ytd-toggle-button-renderer").length) {
+                    if (sche && hasScheduleBadge) {
                         $clonedItem.appendTo(spotlightRenderer);
                         updateHeight();
                     }
