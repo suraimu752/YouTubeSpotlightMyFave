@@ -89,24 +89,29 @@ async function findMyFave(){
     // 高さの設定を関数化
     const updateHeight = () => {
         const itemHeight = 308;
+        const itemWidth = 308;
         const items = spotlightRenderer.find('ytd-rich-item-renderer');
         const itemCount = items.length;
         const containerWidth = $("#contents").width();
         
         if (itemCount > 0) {
             if (style === "wrap") {
-                const itemsPerRow = Math.floor(containerWidth / 308);
+                const itemsPerRow = Math.floor(containerWidth / itemWidth);
                 const rows = Math.ceil(itemCount / itemsPerRow);
                 spotlightWrapper.height(itemHeight * rows);
+                spotlightWrapper.width(containerWidth);
             } else {
                 // overflowモードの場合、高さは固定
                 spotlightWrapper.height(itemHeight);
                 // rendererの幅を設定（アイテム数 × アイテムの幅）
-                const totalWidth = itemCount * 308;
+                const totalWidth = Math.max(containerWidth, (itemCount * itemWidth) - 8);
                 spotlightRenderer.width(totalWidth);
+                // wrapperの幅を厳密に制限
+                spotlightWrapper.css({
+                    'width': containerWidth + 'px',
+                    'max-width': containerWidth + 'px'
+                });
             }
-            // wrapperの幅はコンテンツに合わせる
-            spotlightWrapper.width(containerWidth);
         }
     };
 
@@ -129,20 +134,21 @@ async function findMyFave(){
 
         // ボタンを追加
         $("body").append(`
-            <div id='spotlightLeftBtn' class='spotlightBtn' style='position: fixed; z-index: 2000;'>&lt;</div>
-            <div id='spotlightRightBtn' class='spotlightBtn' style='position: fixed; z-index: 2000;'>&gt;</div>
+            <div id='spotlightLeftBtn' class='spotlightBtn' style='position: fixed; z-index: 2000; cursor: pointer;'>&lt;</div>
+            <div id='spotlightRightBtn' class='spotlightBtn' style='position: fixed; z-index: 2000; cursor: pointer;'>&gt;</div>
         `);
 
         // ボタンの位置を更新する関数
         const updateButtonPositions = () => {
             const wrapperRect = spotlightWrapper[0].getBoundingClientRect();
+            
             $("#spotlightLeftBtn").css({
-                left: wrapperRect.left + 10 + 'px',
+                left: wrapperRect.left + 'px',
                 top: wrapperRect.top + (wrapperRect.height / 2) + 'px',
                 transform: 'translateY(-50%)'
             });
             $("#spotlightRightBtn").css({
-                right: (window.innerWidth - wrapperRect.right) + 10 + 'px',
+                right: '0px',
                 top: wrapperRect.top + (wrapperRect.height / 2) + 'px',
                 transform: 'translateY(-50%)'
             });
@@ -161,8 +167,8 @@ async function findMyFave(){
             spotlightWrapper.stop().animate({
                 scrollLeft: spotlightWrapper.scrollLeft() - scrollAmount
             }, {
-                duration: 400,
-                easing: 'swing'
+                duration: 200,
+                easing: 'linear'
             });
             return false;
         });
@@ -172,8 +178,8 @@ async function findMyFave(){
             spotlightWrapper.stop().animate({
                 scrollLeft: spotlightWrapper.scrollLeft() + scrollAmount
             }, {
-                duration: 400,
-                easing: 'swing'
+                duration: 200,
+                easing: 'linear'
             });
             return false;
         });
