@@ -153,43 +153,48 @@ async function findMyFave(){
     // サムネイルの読み込みを待つ関数
     const waitForThumbnail = ($item) => {
         return new Promise(resolve => {
-            const checkThumbnail = () => {
-                const imgShadow = $item.find('yt-img-shadow');
-                const ytImage = $item.find('yt-image');
-                const img = ytImage.find('img.yt-core-image');
-                
-                // サムネイルの読み込みを強制
-                if (imgShadow.attr('load-delayed') !== undefined) {
-                    imgShadow.removeAttr('load-delayed');
-                }
-                if (!ytImage.attr('loaded')) {
-                    ytImage.attr('loaded', '');
-                }
-                
-                // 画像のsrcが設定されていない場合、data-thumb属性から取得して設定
-                if (img.length > 0 && !img.attr('src') && img.attr('data-thumb')) {
-                    img.attr('src', img.attr('data-thumb'));
-                }
-
+            const checkThumbnail = async () => {
+                const img = $item.find('yt-image img.yt-core-image');
                 const isLoaded = img.length > 0 && img.attr('src');
 
                 if (isLoaded) {
                     resolve(true);
                 } else {
-                    console.log("checkThumbnail");
-                    $item.trigger("mouseover");
-                    imgShadow.trigger("load");
-                    img.trigger("load");
+                    console.log("checkThumbnail"); // デバッグ用 消すな
                     setTimeout(checkThumbnail, 100);
                 }
             };
-            console.log("checkThumbnail");
             checkThumbnail();
+        });
+    };
+
+    // スクロール処理
+    const scrollToBottomAndBack = async () => {
+        const originalScroll = window.scrollY;
+        const viewportHeight = window.innerHeight;
+        const targetScroll = viewportHeight * 3; // 3ページ分
+
+        // 1ページずつ高速スクロール（戻らない）
+        for (let currentScroll = viewportHeight; currentScroll <= targetScroll; currentScroll += viewportHeight) {
+            window.scrollTo({
+                top: currentScroll,
+                behavior: 'instant' // 瞬時にスクロール
+            });
+            await new Promise(resolve => setTimeout(resolve, 1)); // 最小限の待機時間
+        }
+        
+        // スクロール完了後、最後に元の位置に戻る
+        await new Promise(resolve => setTimeout(resolve, 50));
+        window.scrollTo({
+            top: originalScroll,
+            behavior: 'instant'
         });
     };
 
     // 動画のコピーを実行
     const processVideos = async () => {
+        // ページ読み込み完了時にスクロールを実行
+        await scrollToBottomAndBack();
 
         const items = $("ytd-rich-item-renderer.ytd-rich-grid-renderer");
         console.log("Found items:", items.length);
