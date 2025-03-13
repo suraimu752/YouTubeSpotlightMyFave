@@ -88,29 +88,38 @@ async function findMyFave(){
 
     // 高さの設定を関数化
     const updateHeight = () => {
-        const itemHeight = 308;
         const itemWidth = 308;
         const items = spotlightRenderer.find('ytd-rich-item-renderer');
         const itemCount = items.length;
         const containerWidth = $("#contents").width();
         
         if (itemCount > 0) {
+            // rendererの実際の表示サイズを取得
+            const rendererRect = spotlightRenderer[0].getBoundingClientRect();
+            spotlightWrapper.height(rendererRect.height);
+            
             if (style === "wrap") {
-                const itemsPerRow = Math.floor(containerWidth / itemWidth);
-                const rows = Math.ceil(itemCount / itemsPerRow);
-                spotlightWrapper.height(itemHeight * rows);
                 spotlightWrapper.width(containerWidth);
             } else {
-                // overflowモードの場合、高さは固定
-                spotlightWrapper.height(itemHeight);
-                // rendererの幅を設定（アイテム数 × アイテムの幅）
+                // overflowモードの場合の横幅設定
                 const totalWidth = Math.max(containerWidth, (itemCount * itemWidth) - 8);
                 spotlightRenderer.width(totalWidth);
-                // wrapperの幅を厳密に制限
                 spotlightWrapper.css({
                     'width': containerWidth + 'px',
                     'max-width': containerWidth + 'px'
                 });
+
+                // スクロールが必要かどうかを判定
+                const scrollWidth = spotlightWrapper[0].scrollWidth;
+                const clientWidth = spotlightWrapper[0].clientWidth;
+                const needsScroll = scrollWidth > clientWidth;
+
+                // スクロールが不要な場合は左寄せ
+                if (!needsScroll) {
+                    spotlightRenderer.css('justify-content', 'flex-start');
+                } else {
+                    spotlightRenderer.css('justify-content', '');
+                }
             }
         }
     };
@@ -118,18 +127,20 @@ async function findMyFave(){
     // 表示周り
     if(style == "overflow"){
         spotlightWrapper.css({
-            "padding-bottom": "50px",
             "margin-top": "25px",
+            "margin-bottom": "25px",
             "overflow-x": "auto", // 横スクロールを有効化
             "overflow-y": "hidden", // 縦スクロールを無効化
             "scroll-behavior": "smooth", // スムーズスクロール
-            "position": "relative" // 子要素の位置決めの基準点
+            "position": "relative", // 子要素の位置決めの基準点
+            "height": spotlightRenderer[0].getBoundingClientRect().height + "px" // rendererの高さを設定
         });
         spotlightRenderer.css({
             "display": "flex",
             "flex-wrap": "nowrap", // 折り返し防止
             "min-height": "308px", // 最小高さを設定
-            "overflow": "visible" // スクロールをwrapperに移動
+            "overflow": "visible", // スクロールをwrapperに移動
+            "align-items": "stretch" // 子要素を縦方向に引き伸ばす
         });
 
         // ボタンを追加
@@ -140,18 +151,33 @@ async function findMyFave(){
 
         // ボタンの位置を更新する関数
         const updateButtonPositions = () => {
+            const rendererHeight = spotlightRenderer[0].getBoundingClientRect().height;
             const wrapperRect = spotlightWrapper[0].getBoundingClientRect();
+            
+            // スクロールが必要かどうかを判定
+            const scrollWidth = spotlightWrapper[0].scrollWidth;
+            const clientWidth = spotlightWrapper[0].clientWidth;
+            const needsScroll = scrollWidth > clientWidth;
+
+            if (!needsScroll) {
+                $("#spotlightLeftBtn, #spotlightRightBtn").hide();
+                return;
+            }
             
             $("#spotlightLeftBtn").css({
                 left: wrapperRect.left + 'px',
-                top: wrapperRect.top + (wrapperRect.height / 2) + 'px',
+                top: wrapperRect.top + (rendererHeight / 2) + 'px',
                 transform: 'translateY(-50%)'
             });
             $("#spotlightRightBtn").css({
                 right: '0px',
-                top: wrapperRect.top + (wrapperRect.height / 2) + 'px',
+                top: wrapperRect.top + (rendererHeight / 2) + 'px',
                 transform: 'translateY(-50%)'
             });
+
+            // 初期状態では左ボタンを非表示に
+            $("#spotlightLeftBtn").hide();
+            $("#spotlightRightBtn").show();
         };
 
         // 初期位置設定
@@ -208,6 +234,18 @@ async function findMyFave(){
                     $("#spotlightRightBtn").fadeOut(200);
                 }
             }, 100);
+        });
+
+        // rendererの高さ変更を監視して、wrapperの高さとボタンの位置を更新
+        const observer = new MutationObserver(() => {
+            spotlightWrapper.height(spotlightRenderer.height());
+            updateButtonPositions();
+        });
+
+        observer.observe(spotlightRenderer[0], {
+            childList: true,
+            subtree: true,
+            attributes: true
         });
     } else {
         spotlightWrapper.css("margin-top", "25px");
@@ -273,11 +311,11 @@ async function findMyFave(){
                     await waitForThumbnail($item);
                     await new Promise(resolve => setTimeout(resolve, 100));
                     
-                    // 要素をディープクローン
-                    const $clonedItem = $item.clone(true, true);
+                    // 要素を移動
+                    const $targetItem = $item;
                     
-                    // クローンした要素のリンクを修正（相対パスを絶対パスに）
-                    $clonedItem.find('a').each(function() {
+                    // リンクを絶対パスに修正
+                    $targetItem.find('a').each(function() {
                         const $link = $(this);
                         const href = $link.attr('href');
                         if (href && href.startsWith('/')) {
@@ -286,19 +324,19 @@ async function findMyFave(){
                     });
 
                     // ライブ配信、アーカイブ、予定配信の判定
-                    const isLive = !$item.find("ytd-badge-supported-renderer").attr("hidden");
-                    const hasScheduleBadge = $item.find("ytd-toggle-button-renderer").length > 0;
+                    const isLive = !$targetItem.find("ytd-badge-supported-renderer").attr("hidden");
+                    const hasScheduleBadge = $targetItem.find("ytd-toggle-button-renderer").length > 0;
                     
                     if (live && isLive) {
-                        $clonedItem.appendTo(spotlightRenderer);
+                        $targetItem.appendTo(spotlightRenderer);
                         updateHeight();
                     }
                     if (arch && !isLive && !hasScheduleBadge) {
-                        $clonedItem.appendTo(spotlightRenderer);
+                        $targetItem.appendTo(spotlightRenderer);
                         updateHeight();
                     }
                     if (sche && hasScheduleBadge) {
-                        $clonedItem.appendTo(spotlightRenderer);
+                        $targetItem.appendTo(spotlightRenderer);
                         updateHeight();
                     }
                 }
